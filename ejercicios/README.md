@@ -6,3 +6,5 @@ El enunciado de cada problema y su resolución se encuentran en los archivos lis
 * ejercicio1.py
 * ejerccico2.py
 * ahorcado.py
+* supermercado.py
+* triangulos.py
