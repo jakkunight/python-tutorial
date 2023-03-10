@@ -1,129 +1,94 @@
 #!/usr/bin/python
 # Ahorcado!
-# Programa un juego de ahorcado en Python.
+# Programa un juego de ahorcado en Python para dos jugadores.
+# El Jugador 1 ingresa una palabra para que el Jugador 2 la adivine.
+# El Jugador 2 posee seis intentos para adivinar la palabra.
+# El programa debe permitir volver a jugar y llevar registro de las victorias y derrotas
+# de cada jugaador. También debe permitir nombrar a los jugadores.
 
-# Creamos un diccionario con las palabras que vamos a usar para el juego:
-diccionario = [
-    "Paraguay",
-    "Argentina",
-    "Brasil",
-    "Uruguay",
-    "Chile",
-    "Ecuador",
-    "Bolivia",
-    "Venezuela",
-    "Colombia",
-    "Peru",
-    "Surinam",
-    "Guyana Francesa",
-    "Guayana Holandesa"
-]
+# Definimos algunas clases útiles:
+class Jugador:
+    def __init__(self):
+        self.nombre = ""
+        self.puntuacion = 0
+    def nombrar(self, nombre):
+        self.nombre = nombre
+    def incrementar_puntos(self):
+        self.puntuacion += 1
 
-# Definimos algunas variables globales de nuestro juego:
-vidas_totales = 6
-vidas = 6
-palabra = ""
-fin = False
-log = []
+class Jugador1(Jugador):
+    def __init__(self):
+        super().__init__()
+        self.palabra = ""
+    def cargar_palabra(self, palabra):
+        self.palabra = palabra
 
-# Importamos lo necesario para trabajar:
-import random
+class Jugador2(Jugador):
+    def __init__(self):
+        super().__init__()
+        self.vidas = 6
+        self.aciertos = []
+    def reducir_vidas(self):
+        self.vidas -= 1
+    def cargar_aciertos(self, palabra):
+        for letra in palabra:
+            if(letra == " "):
+                self.aciertos.append(letra)
+                continue
+            self.aciertos.append("_")
+    def incrementar_aciertos(self):
+        pass
 
-# Creamos una bonita pantalla de bienvenda:
-def bienvenida():
-    print("======================================")
-    print("| Bienvenido al juego de AHORCADO!!! |")
-    print("======================================")
-    print("**** Reglas ****")
-    print(" 1) El programa elige una palabra al azar de su diccionario de palabras.")
-    print(''' 2) El usuario debe tratar de adivinar la palabra elegida. El jugador debe ingresar una letra. Si la misma está contenida
-    en la palabra, se mostraran en su posicion correspondiente todas las letras que coincidan con la misma. En caso contrario, 
-    se le restaran vidas de las SEIS (6) que posee el jugador hasta que se complete la figura del "ahorcado", lo cual indica que el 
-    jugador ha perdido el juego, revelandose la palabra elegida.''')
 
-# Creamos la rutina que muestra el cuerpo del "ahorcado":
-def mostrar_ahorcado(vidas_actuales):
-    global vidas_totales
-    horca = [
-        " +=====+",
-        " |     |",
-        " |   ",
-        " |   ",
-        " |   ",
-        " |   ",
-        " |   ",
-        " |   ",
-        "================",
-        "|** AHORCADO **|",
-        "================"
-    ]
-    ahorcado = [
-        " www",
-        "(x,x)",
-        " /|\\",
-        "  |",
-        " / \\",
-        "/   \\",
-    ]
-    for i in range(0, 11):
-        if(i < 2 or i > 7):
-            print(horca[i])
-        else:
-            if(i - 2 < vidas_totales - vidas_actuales):
-                print(horca[i] + ahorcado[i - 2])
-            else:
-                print(horca[i])
+# Definimos una rutina para limpiar la pantalla y posicionar el cursor en el inicio de
+# la pantalla:
+def clear():
+    print("\033[2J")
+    print("\033[0;0f")
 
-# Creamos una función para elegir la palabra y cargarla en la variable global:
-def setup():
-    global palabra
-    global log
-    palabra = diccionario[random.randint(0, 12)]
-    log = ["_"] * len(palabra)
+# Lógica del juego:
+clear()
+J1 = Jugador1()
+J2 = Jugador2()
+J1.nombrar(input("Ingrese nombre del jugador 1: "))
+J2.nombrar(input("Ingrese nombre del jugador 2: "))
+while(True):
+    clear()
+    from getpass import getpass
+    J1.cargar_palabra(getpass("Ingresa una palabra para que " + J2.nombre + " la adivine: "))
+    J2.cargar_aciertos(J1.palabra)
+    while(True):
+        clear()
+        print("=============")
+        print("| AHORCADO! |")
+        print("=============")
+        print("Vidas: " + str(J2.vidas))
+        for char in J2.aciertos:
+            print(char, end="")
+        print(" ")
+        letra = input("Ingresa una letra: ")
+        check = False
+        for i in range(0, len(J1.palabra)):
+            if(letra.upper() == J1.palabra[i].upper()):
+                check = True
+                J2.aciertos[i] = J1.palabra[i]
+        if(not check):
+            J2.reducir_vidas()
+        if(not "_" in J2.aciertos):
+            clear()
+            print(J2.nombre + " ha ganado!!!")
+            J2.incrementar_puntos()
+            break
+        if(J2.vidas == 0):
+            clear()
+            print(J1.nombre + " ha ganado!!!")
+            J1.incrementar_puntos()
+            break
+    opt = input("Quieren jugar de nuevo? [Y/n]: ")
+    if(opt.upper() == "N"):
+        print("Total de puntos:")
+        print(J1.nombre + ": " + str(J1.puntuacion))
+        print(J2.nombre + ": " + str(J2.puntuacion))
+        print("Hasta la proxima!")
+        break
     
-
-# Creamos una rutina para mostrar los aciertos al jugador:
-def console():
-    print(" ")
-    global palabra, log, vidas
-    for letter in log:
-        print(letter, end=" ")
-    print("Vidas: " + str(vidas))
-    letra = input("Ingrese una letra: ")
-    ahorcar = True
-    for i in range(0, len(palabra)):
-        if(palabra[i].upper() == letra.upper()):
-            log[i] = letra.upper()
-            ahorcar = False
-    if(ahorcar == True):
-        vidas -= 1
-    win = True
-    for ch in log:
-        if(ch == "_"):
-            win = False
-    if(win == True):
-        print("GANASTE!!!")
-        finalizar_juego()
-    if(vidas == 0):
-        print("PERDISTE!!!")
-        finalizar_juego()
-
-# Creamos la rutina para finalizar el juego:
-def finalizar_juego():
-    global fin
-    respuesta = input("Quieres volver a jugar? [Y/n]")
-    while(respuesta != "y" and respuesta != "n" and respuesta != "Y" and respuesta != "N"):
-        print(respuesta)
-        respuesta = input("Quieres volver a jugar? [Y/n]")
-    if(respuesta == "Y" or respuesta == "y"):
-        fin = False
-    if(respuesta == "N" or respuesta == "n"):
-        fin = True
-
-
-# Juego:
-while (True):
-    bienvenida()
-    setup()
-    while(fin != True):
-        console()
