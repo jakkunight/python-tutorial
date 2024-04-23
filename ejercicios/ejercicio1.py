@@ -14,7 +14,7 @@ while(base <= 0):
     print("Longitud invalida.")
     base = float(input("Ingrese una longitud valida para la base: "))
 es_hipotenusa = int(input("Es la base la HIPOTENUSA? [0/1]: "))
-while(es_hipotenusa < 0 and es_hipotenusa > 1):
+while(es_hipotenusa < 0 or es_hipotenusa > 1):
     print("Respuesta no valida. Ingrese de nuevo el dato. [0/1]")
     es_hipotenusa = int(input("Es la base la HIPOTENUSA? [0/1]: "))
 altura = float(input("Ingrese una longitud valida para la atura: "))
